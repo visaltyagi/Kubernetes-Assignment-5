@@ -1,0 +1,102 @@
+#1: Update the machine
+sudo apt-get update
+
+#2: Login as a root user
+sudo su -
+
+#3: Create an install.sh file
+sudo nano install.sh
+
+#4: Paste this code to install the minikube:
+sudo apt update
+sudo apt install docker.io -y
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube_latest_amd64.deb
+sudo dpkg -i minikube_latest_amd64.deb
+sudo chmod 777 /var/run/docker.sock
+minikube start
+sudo snap install kubectl --classic
+minikube addons enable ingress
+
+#5: Run the bash command:
+bash install.sh
+
+#6: Run this command to start the docker forcefully:
+minikube start --force --driver=docker
+
+#7: Enable the ingress addon using this command:
+minikube addons enable ingress
+
+#8: To find the cluster, run this command:
+kubectl get no
+
+#9: Deploy a nginx deployment with 3 replicas using the below-given commands:
+kubectl create deployment nginx --image=nginx --port=80 --replicas=3
+
+#10: Check the nginx deployment using the below-given command:
+kubectl get deploy
+
+#11: Deploy an apache deployment with 3 replicas using the below-given commands:
+kubectl create deployment apache --image=ubuntu/apache2 --port=80 --replicas=3
+
+#12: Check the apache deployment using the below-given command:
+kubectl get deploy
+
+#13: Create a nginx NodePort service using the below-given command:
+kubectl expose deploy nginx --type=NodePort
+
+#1a4: To check that nginx is deployed on NodePort or not, use this command:
+kubectl get svc -o wide
+
+#15: Create an apache NodePort service using the below-given command:
+kubectl expose deploy apache --type=NodePort
+
+#16: To check that nginx is deployed on NodePort or not, use this command:
+kubectl get svc -o wide
+
+#17: Create an ingress file using the below-given command:
+sudo nano ingress.yaml
+
+#18: Paste this code here:
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /apache
+            pathType: Prefix
+            backend:
+              service:
+                name: apache
+                port:
+                  number: 80
+          - path: /nginx
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx
+                port:
+                  number: 80
+
+#19: Execute the ingress using the below-given command:
+kubectl apply -f ingress.yaml
+
+#20: To check the ingress, use this command:
+kubectl get ing
+
+#21: Apply the Port Forwarding Using this Command:
+kubectl port-forward service/ingress-nginx-controller -n ingress-nginx --address 0.0.0.0 :443
+
+#22: Go to the browser address bar, type this URL: https://65.1.131.18:45799/nginx
+The nginx page will be shown here.
+
+#23: Go to the browser address bar, type this URL: https:// 65.1.131.18:45799/apache
+The apache page will be shown here.
+
+
+
